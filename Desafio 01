@@ -1,0 +1,253 @@
+import java.time.LocalDateTime
+
+fun main() {
+    val colegioEstrela = DigitalHouseManager()
+    colegioEstrela.registrarAluno("Junior", "Fagundes", 34)
+    colegioEstrela.registrarAluno("Bruno", "Bello", 10)
+    colegioEstrela.registrarAluno("Ana", "Maria", 22)
+    colegioEstrela.registrarAluno("Silas", "Santana", 18)
+    colegioEstrela.registrarCurso("Modelagem", 90, 3)
+    colegioEstrela.registrarCurso("Programação", 61, 35)
+    colegioEstrela.registrarCurso("Matemática", 61, 30)
+    colegioEstrela.excluirCurso(35)
+    colegioEstrela.excluirCurso(61)
+    colegioEstrela.registrarAluno("Mendes", "Camaro", 34)
+    colegioEstrela.registrarProfessorAdjunto("joão", "Carlos", 1, 100)
+    colegioEstrela.registrarProfessorAdjunto("Maria", "Joaquina", 2, 80)
+    colegioEstrela.registrarProfessorTitular("Pedro", "Bil", 3, "Mestrado")
+    colegioEstrela.registrarProfessorTitular("Joana", "Pires", 1, "Doutorado")
+    colegioEstrela.excluirProfessor(2)
+    colegioEstrela.matricularAluno(10, 90)
+    colegioEstrela.matricularAluno(34, 90)
+    colegioEstrela.matricularAluno(10, 90)
+    colegioEstrela.matricularAluno(22, 90)
+    colegioEstrela.matricularAluno(18, 90)
+    colegioEstrela.alocarProfessores(90, 3, 2)
+
+}
+
+open class Aluno(
+    val nome: String,
+    val sobrenome: String,
+    val codigoAluno: Int
+)
+
+open class Professor(
+    val nome: String,
+    val sobrenome: String,
+    val tempoDeCasa: Long,
+    val codigoProfessor: Int
+)
+
+class ProfessorTitular(
+    val especialidade: String,
+    nome: String,
+    sobrenome: String,
+    tempoDeCasa: Long,
+    codigoProfessor: Int
+) : Professor(nome, sobrenome, tempoDeCasa, codigoProfessor)
+
+class ProfessorAdjunto(
+    val horasMonitoria: Int,
+    nome: String,
+    sobrenome: String,
+    tempoDeCasa: Long,
+    codigoProfessor: Int
+) : Professor(nome, sobrenome, tempoDeCasa, codigoProfessor)
+
+open class Curso(
+    val nomeDoCurso: String,
+    val codigoDoCurso: Int,
+    var professorTitular: ProfessorTitular? = null,
+    var professorAdjunto: ProfessorAdjunto? = null,
+    val maxAlunos: Int,
+    var listaAlunos: MutableList<Int?> = mutableListOf()
+) {
+
+    open fun adicionarAluno(umAluno: Aluno): Boolean {
+        var podeAdicionar = false
+        if (listaAlunos.size >= maxAlunos) {
+            println("Não é possível matricular ${umAluno.nome} no curso de $nomeDoCurso")
+            return podeAdicionar
+        } else {
+            if (listaAlunos.contains(umAluno.codigoAluno)) {
+                println("${umAluno.nome} já está matriculado no curso de $nomeDoCurso")
+                podeAdicionar = false
+                return podeAdicionar
+            } else {
+                listaAlunos.add(umAluno.codigoAluno)
+                println("${umAluno.nome} foi matriculado no curso de $nomeDoCurso")
+                podeAdicionar = true
+                return podeAdicionar
+            }
+        }
+    }
+
+    open fun excluirAluno(umAluno: Aluno) {
+        if (listaAlunos.contains(umAluno.codigoAluno)) {
+            listaAlunos.remove(umAluno.codigoAluno)
+            println("${umAluno.nome} foi desmatriculado do curso de $nomeDoCurso")
+        } else {
+            println("${umAluno.nome} não está matriculado no curso de $nomeDoCurso")
+        }
+    }
+}
+
+open class Matricula(umAluno: Aluno, umCurso: Curso, umaData: LocalDateTime = LocalDateTime.now()) {
+    init {
+        var matricula: MutableList<Any> = mutableListOf(umAluno, umCurso, umaData)
+    }
+}
+
+class DigitalHouseManager(
+    var listaCodigoAlunos: MutableList<Int> = mutableListOf(),
+    var listaCodigoProfessores: MutableList<Int> = mutableListOf(),
+    var listaCodigoCursos: MutableList<Int> = mutableListOf(),
+    var listaMatricula: MutableList<Matricula> = mutableListOf()
+) {
+    var listaTotalCurso: MutableList<Curso> = mutableListOf()
+    var listaTotalAlunos: MutableList<Aluno> = mutableListOf()
+    var listaTotalProfessores: MutableList<Professor> = mutableListOf()
+    var listaTotalProfessoresTitulares: MutableList<ProfessorTitular> = mutableListOf()
+    var listaTotalProfessoresAdjutos: MutableList<ProfessorAdjunto> = mutableListOf()
+
+    fun registrarCurso(
+        nome: String,
+        codigoDoCurso: Int,
+        maxAlunos: Int
+    ) {
+        if (listaCodigoCursos.contains(codigoDoCurso)) {
+            println("O curso já está registrado")
+        } else {
+            val nomeVariavel = Curso(nome, codigoDoCurso, professorTitular = null, professorAdjunto = null, maxAlunos)
+            listaCodigoCursos.add(nomeVariavel.codigoDoCurso)
+            listaTotalCurso.add(nomeVariavel)
+            println("O curso foi registrado com sucesso")
+        }
+    }
+
+    fun excluirCurso(codigoDoCurso: Int) {
+        if (listaCodigoCursos.contains(codigoDoCurso)) {
+            listaCodigoCursos.remove(codigoDoCurso)
+            for (item in listaTotalCurso) {
+                if (item.codigoDoCurso == codigoDoCurso) {
+                    listaTotalCurso.remove(item)
+                }
+                break
+            }
+            println("O curso foi excluído da lista de cursos disponíveis")
+        } else {
+            println("O curso não está registrado!")
+        }
+    }
+
+    fun registrarProfessorAdjunto(
+        nome: String,
+        sobrenome: String,
+        codigoProfessor: Int,
+        quantidadeDeHoras: Int
+    ) {
+        if (listaCodigoProfessores.contains(codigoProfessor)) {
+            println("O professor já está registrado")
+        } else {
+            val nomeVariavel = ProfessorAdjunto(quantidadeDeHoras, nome, sobrenome, 0, codigoProfessor)
+            listaCodigoProfessores.add(nomeVariavel.codigoProfessor)
+            listaTotalProfessores.add(nomeVariavel)
+            listaTotalProfessoresAdjutos.add(nomeVariavel)
+            println("O professor foi registrado com sucesso!")
+        }
+    }
+
+    fun registrarProfessorTitular(
+        nome: String,
+        sobrenome: String,
+        codigoProfessor: Int,
+        especialidade: String
+    ) {
+        if (listaCodigoProfessores.contains(codigoProfessor)) {
+            println("O professor já está registrado")
+        } else {
+            val nomeVariavel = ProfessorTitular(especialidade, nome, sobrenome, 0, codigoProfessor)
+            listaCodigoProfessores.add(nomeVariavel.codigoProfessor)
+            listaTotalProfessores.add(nomeVariavel)
+            listaTotalProfessoresTitulares.add(nomeVariavel)
+            println("O professor foi registrado com sucesso!")
+        }
+    }
+
+    fun excluirProfessor(codigProfessor: Int) {
+        if (listaCodigoProfessores.contains(codigProfessor)) {
+            listaCodigoProfessores.remove(codigProfessor)
+            for (item in listaTotalProfessores) {
+                if (item.codigoProfessor == codigProfessor) {
+                    listaTotalProfessores.remove(item)
+                    break
+                }
+            }
+            println("O professor foi excluído da lista de professores")
+        } else {
+            println("O professor não faz parte do quadro de professores!")
+        }
+    }
+
+    fun registrarAluno(
+        nome: String,
+        sobrenome: String,
+        codiAluno: Int
+    ) {
+        if (listaCodigoAlunos.contains(codiAluno)) {
+            println("O aluno já está registrado")
+        } else {
+            val nomeVariavel = Aluno(nome, sobrenome, codiAluno)
+            listaCodigoAlunos.add(nomeVariavel.codigoAluno)
+            listaTotalAlunos.add(nomeVariavel)
+            println("O aluno foi registrado com sucesso")
+        }
+    }
+
+    fun matricularAluno(codigAluno: Int, codigCurso: Int) {
+        for (aluno in listaTotalAlunos) {
+            if (aluno.codigoAluno == codigAluno) {
+                for (curso in listaTotalCurso) {
+                    if (curso.codigoDoCurso == codigCurso && curso.adicionarAluno(aluno)) {
+                        val matricula = Matricula(aluno, curso)
+                        listaMatricula.add(matricula)
+                        break
+                    }
+                }
+            }
+
+        }
+    }
+
+    fun alocarProfessores(
+        cdigoCurso: Int,
+        codigoProfessorTitular: Int,
+        codigoProfessorAdjunto: Int
+    ) {
+        for (curso in listaTotalCurso) {
+            if (curso.codigoDoCurso == cdigoCurso) {
+                for (professor in listaTotalProfessoresTitulares) {
+                    if (professor.codigoProfessor == codigoProfessorTitular) {
+                        curso.professorTitular = professor
+                        println("Professor titular alocado!")
+                        break
+                    }
+                }
+            }
+            break
+        }
+        for (curso in listaTotalCurso) {
+            if (curso.codigoDoCurso == cdigoCurso) {
+                for (professor in listaTotalProfessoresAdjutos) {
+                    if (professor.codigoProfessor == codigoProfessorAdjunto) {
+                        curso.professorAdjunto = professor
+                        println("Professor adjunto alocado!")
+                        break
+                    }
+                }
+            }
+            break
+        }
+    }
+}
